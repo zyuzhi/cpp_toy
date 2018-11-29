@@ -1,5 +1,7 @@
 #pragma once
 #include <cstdint>
+#include <iostream>
+#include <memory>
 
 namespace tuple {
 
@@ -8,8 +10,11 @@ struct tuple;
 
 template<typename T, typename ...Ts>
 struct tuple<T, Ts...> : tuple<Ts...> {
-  explicit tuple(const T& v, const Ts&... args)
-    : value(v), tuple<Ts...>(args...) {}
+  tuple() : value(T()), tuple<Ts...>() {}
+  explicit tuple(const T& v, const Ts&... args) : value(v), tuple<Ts...>(args...) {}
+  explicit tuple(T&& v, Ts&&... args) : value(std::forward<T>(v)), tuple<Ts...>(std::forward<Ts>(args)...) {}
+  tuple(const tuple<T, Ts...>& t) : value(t.value), tuple<Ts...>(static_cast<const tuple<Ts...>&>(t)) {}
+  tuple(tuple<T, Ts...>&& t) : value(std::move(t.value)), tuple<Ts...>(static_cast<const tuple<Ts...>&>(t)) {}
   T value;
 };
 
@@ -21,8 +26,11 @@ using null_tuple = tuple<>;
 
 template<typename T>
 struct tuple<T> : null_tuple {
-  explicit tuple(const T& v)
-    : value(v) {}
+  tuple() : value(T()) {}
+  explicit tuple(const T& v) : value(v) {}
+  explicit tuple(T&& v) : value(std::forward<T>(v)) {}
+  tuple(const tuple<T>& t) : value(t.value) {}
+  tuple(tuple<T>&& t) : value(std::move(t.value)) {}
   T value;
 };
 
@@ -53,7 +61,6 @@ get(tuple<Ts...> &t) {
     using ClassType = typename tuple_traits<Index, tuple<Ts...> >::ClassType;
     return ((ClassType *)&t)->value;
 };
-
 template<typename ...Ts>
 tuple<Ts...> make_tuple(const Ts &... args) {
     return tuple<Ts...>{args...};
