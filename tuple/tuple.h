@@ -1,6 +1,5 @@
 #pragma once
 #include <cstdint>
-#include <iostream>
 #include <memory>
 
 namespace tuple {
@@ -15,6 +14,17 @@ struct tuple<T, Ts...> : tuple<Ts...> {
   explicit tuple(T&& v, Ts&&... args) : value(std::forward<T>(v)), tuple<Ts...>(std::forward<Ts>(args)...) {}
   tuple(const tuple<T, Ts...>& t) : value(t.value), tuple<Ts...>(static_cast<const tuple<Ts...>&>(t)) {}
   tuple(tuple<T, Ts...>&& t) : value(std::move(t.value)), tuple<Ts...>(static_cast<const tuple<Ts...>&>(t)) {}
+
+  tuple<T, Ts...>& operator=(const tuple<T, Ts...>& t) {
+    value = t.value;
+    static_cast<tuple<Ts...> *>(this)->operator=(t);
+    return *this;
+  }
+  tuple<T, Ts...>& operator=(tuple<T, Ts...>&& t) {
+    value = std::move(t.value);
+    static_cast<tuple<Ts...> *>(this)->operator=(t);
+    return *this;
+  }
   T value;
 };
 
@@ -31,6 +41,14 @@ struct tuple<T> : null_tuple {
   explicit tuple(T&& v) : value(std::forward<T>(v)) {}
   tuple(const tuple<T>& t) : value(t.value) {}
   tuple(tuple<T>&& t) : value(std::move(t.value)) {}
+  tuple<T>& operator=(const tuple<T> &t) {
+    value = t.value;
+    return *this;
+  }
+  tuple<T>& operator=(tuple<T>&& t) {
+    value = std::move(t.value);
+    return *this;
+  }
   T value;
 };
 
