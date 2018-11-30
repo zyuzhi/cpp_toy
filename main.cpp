@@ -14,8 +14,12 @@ void test_tuple() {
 void test_functional() {
   struct Foo {
     Foo(int i) : i_(i) {}
-    void echo() {
-      std::cout << i_ << std::endl;
+    void echo() const {
+      std::cout << "echo " << i_ << std::endl;
+    }
+
+    void echo2() {
+      std::cout << "echo2 " << i_ << std::endl;
     }
    private:
     int i_;
@@ -25,11 +29,13 @@ void test_functional() {
   const auto lambda_f = [](){return 1;};
   function<int()> f1(lambda_f);
   function<void()> f2(test_tuple);
-  function<void (Foo::*)()> f3(&Foo::echo);
+  function<void (Foo::*)() const> f3(&Foo::echo);
+  function<void (Foo::*)()> f4(&Foo::echo2);
   std::cout << f1() << std::endl;
   f2();
   Foo o(4);
   f3(&o);
+  f4(&o);
 }
 
 int main() {

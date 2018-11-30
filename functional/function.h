@@ -14,7 +14,11 @@ struct function_traits<R (C::*)(Args...)> {
 };
 
 template<typename R, typename ...Args, typename C>
-struct function_traits<R (C::*)(Args...) const> : function_traits<R (C::*)(Args...)> {};
+struct function_traits<R (C::*)(Args...) const> {
+  using RawType = R(C::*)(Args...) const;
+  using Return = R;
+  using Class = C;
+};
 
 template<typename R, typename ...Args>
 struct function_traits<R (Args...)> {
